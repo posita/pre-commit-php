@@ -54,12 +54,14 @@ while getopts ":s:" optname
     esac
   done
 
+shift "$arg_lookup_start"
+
 # Loop through the list of paths to run php lint against
 parse_error_count=0
-for path in ${*:$arg_lookup_start}
+for path in "$@"
 do
-    php -l "$path" 1> /dev/null
-    if [ $? -ne 0 ]; then
+    php -l "$path" | grep -Ev '^No syntax errors detected in '
+    if [ ${PIPESTATUS[0]} -ne 0 ]; then
 #        echo "PHP Parse errors were detected" >&2
         parse_error_count=$[$parse_error_count +1]
         php_errors_found=true
